@@ -67,6 +67,9 @@ def main():
     except stellar_base.address.AccountNotExistError:
         print('No account found for provided secret.')
         parser.print_help()
+    except Exception as exc:
+        print(str(exc))
+        parser.print_help()
     else:
         print('{} of {} successfully issued and sent to {}'.format(args.amount, args.asset, args.recipient))
 
