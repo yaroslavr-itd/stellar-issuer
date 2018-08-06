@@ -13,7 +13,7 @@ or
 
 ### Usage
 ``` 
-python3 stellar_issuer.py [-h] [-d] issuer asset amount recipient ```
+python3 stellar_issuer.py [-h] [-d] issuer asset amount recipient
 ```
 
 ```
