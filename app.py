@@ -8,7 +8,8 @@ import stellar_base.builder
 parser = argparse.ArgumentParser(description='Issue an asset and send issued amount to recipient.')
 parser.add_argument('issuer', type=str, help='Secret key of issuer-account.')
 parser.add_argument('asset', type=str, help='Code of asset, that need to be issued.')
-parser.add_argument('recipient', type=str, help='Recipient')
+parser.add_argument('amount', type=str, help='Amount of issuing asset that will be sent to recipient.')
+parser.add_argument('recipient', type=str, help='Recipient of issued amount of asset.')
 parser.add_argument(
     '-d', '--debug', required=False, action='store_true', default=True,
     help='Transaction will be submitted to test network if debug mode specified and to main network otherwise.'
@@ -33,7 +34,7 @@ def prepare_send(builder, from_secret, to_pubkey, amount, asset_code):
 
 
 def submit(builder):
-    """Submit a transaction"""
+    """Sign and submit a transaction"""
     builder.sign()
     response = builder.submit()
     if 'status' in response and response['status'] >= 300:
@@ -43,15 +44,21 @@ def submit(builder):
 
 def main():
     args = parser.parse_args()
-    secret_key = sys.argv[1]
-    asset_code = sys.argv[2]
-    recipient_pubkey = sys.argv[3]
-    builder = gen_builder(secret_key, 'TESTNET')
-    prepare_send(builder, secret_key, recipient_pubkey, '10.0', asset_code)
+    network = 'TESTNET' if args.debug else 'PUBLIC'
     try:
+        builder = gen_builder(args.issuer, network)
+        prepare_send(builder, args.issuer, args.recipient, args.amount, args.asset)
         submit(builder)
     except StellarTransactionFailed as exc:
         print(exc)
+        parser.print_help()
+        exit()
+    except stellar_base.utils.DecodeError:
+        print('Incorrect address.')
+        parser.print_help()
         exit()
 
-main()
+
+if __name__ == '__main__':
+    main()
+
