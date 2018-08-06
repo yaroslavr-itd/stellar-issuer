@@ -1,8 +1,18 @@
 import sys
+import argparse
 
 import stellar_base.keypair
 import stellar_base.utils
 import stellar_base.builder
+
+parser = argparse.ArgumentParser(description='Issue an asset and send issued amount to recipient.')
+parser.add_argument('issuer', type=str, help='Secret key of issuer-account.')
+parser.add_argument('asset', type=str, help='Code of asset, that need to be issued.')
+parser.add_argument('recipient', type=str, help='Recipient')
+parser.add_argument(
+    '-d', '--debug', required=False, action='store_true', default=True,
+    help='Transaction will be submitted to test network if debug mode specified and to main network otherwise.'
+         ' (default: %(default)s)')
 
 
 class StellarTransactionFailed(Exception):
@@ -32,6 +42,7 @@ def submit(builder):
 
 
 def main():
+    args = parser.parse_args()
     secret_key = sys.argv[1]
     asset_code = sys.argv[2]
     recipient_pubkey = sys.argv[3]
