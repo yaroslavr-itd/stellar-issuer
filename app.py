@@ -1,6 +1,7 @@
 import sys
 import argparse
 
+import stellar_base.address
 import stellar_base.keypair
 import stellar_base.utils
 import stellar_base.builder
@@ -11,7 +12,7 @@ parser.add_argument('asset', type=str, help='Code of asset, that need to be issu
 parser.add_argument('amount', type=str, help='Amount of issuing asset that will be sent to recipient.')
 parser.add_argument('recipient', type=str, help='Recipient of issued amount of asset.')
 parser.add_argument(
-    '-d', '--debug', required=False, action='store_true', default=True,
+    '-d', '--debug', required=False, action='store_true', default=False,
     help='Transaction will be submitted to test network if debug mode specified and to main network otherwise.'
          ' (default: %(default)s)')
 
@@ -20,9 +21,16 @@ class StellarTransactionFailed(Exception):
     """A stellar transaction failed."""
 
 
-def gen_builder(secret_key, network):
+def get_account_sequence(secret, network='TESTNET'):
+    """Get account sequence number."""
+    details = stellar_base.address.Address(secret=secret, network=network)
+    details.get()
+    return details.sequence
+
+
+def gen_builder(secret_key, network, sequence=None):
     """Create a builder."""
-    builder = stellar_base.builder.Builder(secret=secret_key, network=network)
+    builder = stellar_base.builder.Builder(secret=secret_key, network=network, sequence=sequence)
     return builder
 
 
@@ -46,7 +54,8 @@ def main():
     args = parser.parse_args()
     network = 'TESTNET' if args.debug else 'PUBLIC'
     try:
-        builder = gen_builder(args.issuer, network)
+        sequence_number = get_account_sequence(secret=args.issuer, network=network)
+        builder = gen_builder(args.issuer, network, sequence=sequence_number)
         prepare_send(builder, args.issuer, args.recipient, args.amount, args.asset)
         submit(builder)
     except StellarTransactionFailed as exc:
@@ -54,6 +63,9 @@ def main():
         parser.print_help()
     except stellar_base.utils.DecodeError:
         print('Incorrect address.')
+        parser.print_help()
+    except stellar_base.address.AccountNotExistError:
+        print('No account found for provided secret.')
         parser.print_help()
     else:
         print('{} of {} successfully issued and sent to {}'.format(args.amount, args.asset, args.recipient))
