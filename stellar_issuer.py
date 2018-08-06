@@ -9,7 +9,7 @@ import stellar_base.builder
 parser = argparse.ArgumentParser(description='Issue an asset and send issued amount to recipient.')
 parser.add_argument('issuer', type=str, help='Secret key of issuer-account.')
 parser.add_argument('asset', type=str, help='Code of asset, that need to be issued.')
-parser.add_argument('amount', type=str, help='Amount of issuing asset that will be sent to recipient.')
+parser.add_argument('amount', type=str, help='Amount of issued asset that will be sent to recipient.')
 parser.add_argument('recipient', type=str, help='Recipient of issued amount of asset.')
 parser.add_argument(
     '-d', '--debug', required=False, action='store_true', default=False,
