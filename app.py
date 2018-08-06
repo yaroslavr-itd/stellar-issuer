@@ -52,11 +52,11 @@ def main():
     except StellarTransactionFailed as exc:
         print(exc)
         parser.print_help()
-        exit()
     except stellar_base.utils.DecodeError:
         print('Incorrect address.')
         parser.print_help()
-        exit()
+    else:
+        print('{} of {} successfully issued and sent to {}'.format(args.amount, args.asset, args.recipient))
 
 
 if __name__ == '__main__':
